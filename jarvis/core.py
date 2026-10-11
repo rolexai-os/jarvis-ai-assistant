@@ -46,29 +46,42 @@ def safe_calculate(expression):
 def handle_command(command, services=None):
     services = services or {}
     text = command.strip()
-    low = text.lower()
+    low = text.casefold()
+    plugin_enabled = services.get("plugin_enabled", lambda _name: True)
     if not text:
         return "I'm listening. Say 'JARVIS' followed by a command, or type one below."
     if low in {"help", "commands"}:
         return ("Commands: help, time, system status, open <website or installed app>, "
                 "search web <words>, calculate <math>, remind me to <task> in 10 minutes, "
-                "reminders, search files <words>, lock PC, open terminal, update, clear, exit.")
+                "reminders, search files <words>, security log, plugins, personalize, "
+                "lock PC, open terminal, update, clear, exit.")
     if low in {"time", "what time is it", "what time is it?"}:
         return datetime.now().astimezone().strftime("Local time: %A, %d %B %Y, %I:%M:%S %p")
     if low in {"system status", "status"}:
+        if not plugin_enabled("system-status"):
+            return "The System status skill is disabled in Plugins."
         return services["system_status"]() if services.get("system_status") else "See dashboard for status."
+    if low in {"security log", "security center"}:
+        fn = services.get("show_security")
+        return fn() or "Security center opened." if fn else "Use Security center from the dashboard."
+    if low in {"plugins", "show plugins"}:
+        fn = services.get("show_plugins")
+        return fn() or "Plugins window opened." if fn else "Use Plugins from the dashboard."
+    if low in {"personalize", "preferences", "settings"}:
+        fn = services.get("show_preferences")
+        return fn() or "Personalization window opened." if fn else "Use Personalize from the dashboard."
     if low in {"lock pc", "lock computer", "lock my pc", "lock workstation"}:
         fn = services.get("lock_pc")
         return fn() if fn else "PC lock is available on Windows only."
     if low in {"terminal", "open terminal", "powershell", "open powershell", "command prompt", "open command prompt"}:
         fn = services.get("open_terminal")
-        return fn() or "Terminal Mode opened." if fn else "Terminal Mode is available from the dashboard."
+        return (fn() or "Terminal Mode opened.") if fn else "Terminal Mode is available from the dashboard."
     if low in {"update", "update jarvis", "check for updates"}:
         fn = services.get("update")
-        return fn() or "Updater started." if fn else "Use scripts/update.ps1 from the repository folder."
+        return (fn() or "Updater started.") if fn else "Use scripts/update.ps1 from the repository folder."
     if low.startswith("open "):
         target = text[5:].strip()
-        target_low = target.lower()
+        target_low = target.casefold()
         if target_low in WEBSITES:
             webbrowser.open(WEBSITES[target_low])
             return f"Opening {target}."
@@ -77,13 +90,25 @@ def handle_command(command, services=None):
         if services.get("open_app"):
             return services["open_app"](target)
         return "App launcher unavailable. Try a website, Notepad, Calculator or Explorer."
+    if low.startswith("research web "):
+        if not plugin_enabled("web-search"):
+            return "The Web search skill is disabled in Plugins."
+        query = text[13:].strip()
+        if not query:
+            return "Add a topic after 'research web'."
+        fn = services.get("research_web")
+        return fn(query) if fn else "Web research is unavailable in this build."
     if low.startswith("search web "):
+        if not plugin_enabled("web-search"):
+            return "The Web search skill is disabled in Plugins."
         query = text[11:].strip()
         if not query:
             return "Add search terms."
         webbrowser.open("https://www.google.com/search?q=" + quote_plus(query))
-        return "Searching the web for: " + query
+        return "Opened a web search for: " + query
     if low.startswith("calculate "):
+        if not plugin_enabled("calculator"):
+            return "The Calculator skill is disabled in Plugins."
         try:
             return "Result: " + str(safe_calculate(text[10:].strip()))
         except (ValueError, SyntaxError, ZeroDivisionError, OverflowError) as exc:
@@ -100,7 +125,7 @@ def handle_command(command, services=None):
         return f"Reminder saved: {item['task']} at {item['due']}"
     if low == "reminders":
         items = services["reminders"].list_items() if services.get("reminders") else []
-        return "\\n".join(f"- {i['task']} — {i['due']}" for i in items) if items else "No pending reminders."
+        return "\n".join(f"- {i['task']} — {i['due']}" for i in items) if items else "No pending reminders."
     if low.startswith("search files "):
         return services["search_files"](text[13:].strip()) if services.get("search_files") else "Choose a folder using Search files first."
     if low == "clear":

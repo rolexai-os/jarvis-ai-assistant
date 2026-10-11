@@ -1,0 +1,2 @@
+# Optional offline speech recognition only; main requirements.txt remains unchanged.
+vosk>=0.3.45

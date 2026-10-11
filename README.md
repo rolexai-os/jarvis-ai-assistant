@@ -1,6 +1,6 @@
 # JARVIS AI Assistant
 
-Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces.
+Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces. Current feature-branch version: **0.4.0**.
 
 ## Features
 - Animated cyan arc-reactor dashboard, system telemetry and conversation log.
@@ -14,10 +14,16 @@ Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces.
 - Dedicated PowerShell / Command Prompt window with per-command confirmation, visible output and timeout.
 - Embedded terminal blocks common high-risk disk, boot, registry, shutdown and bulk-delete command patterns.
 - PowerShell updater checks GitHub, fast-forward updates a clean `main` checkout and refreshes dependencies while preserving `.env`.
-- Optional OpenAI cloud chat or local Ollama chat.
+- Optional OpenAI cloud chat or local Ollama chat with bounded in-memory conversation context.
+- Optional offline one-shot speech recognition via Vosk and a user-downloaded local model.
+- Local personalization for assistant name, speech rate and spoken responses.
+- Local JSONL security/audit log, viewed in the dashboard Security Center.
+- Built-in skill registry with persistent enable/disable preferences; arbitrary third-party Python plugins are not executed.
+- User-triggered web research that returns DuckDuckGo result snippets and source URLs.
+- Expanded CPU, RAM, disk, process-count, battery and uptime telemetry where supported.
 - Unit tests, MIT license and GitHub Actions test workflow.
 
-**Status:** early-stage MVP. Wake-word recognition currently uses the online Google speech-recognition endpoint; it is not offline wake-word detection. This is not an unrestricted autonomous agent.
+**Status:** early-stage MVP. The wake-word listener still uses online Google speech recognition. Offline voice is an optional one-shot mode, not an offline wake-word engine. Web research sends the search query to DuckDuckGo. This is not an unrestricted autonomous agent.
 
 ## Install on Windows 11
 Install Python 3.11 or 3.12, then run in PowerShell:
@@ -30,8 +36,10 @@ py -3.12 -m venv .venv
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 Copy-Item .env.example .env
-python -m jarvis
+python main.py
 ```
+
+`main.py` is the easiest entry point: it loads `.env` and starts the full desktop dashboard, including the existing and newly integrated features. The modular code remains in `jarvis/`. You can also run `python -m jarvis`.
 
 If PowerShell blocks activation, run `Set-ExecutionPolicy -Scope Process RemoteSigned` in that terminal, then activate again.
 
@@ -43,12 +51,33 @@ If PowerShell blocks activation, run `Set-ExecutionPolicy -Scope Process RemoteS
 
 Wake-word mode continuously samples microphone audio while enabled and sends audio snippets for online speech recognition. Avoid it if you do not want audio sent to that service. Clap detection processes microphone levels locally. Check Windows microphone privacy settings. Only one listener is enabled at a time by the GUI.
 
+## Optional offline voice (Vosk)
+
+The normal `requirements.txt` does not install Vosk or a language model. For offline one-shot speech recognition:
+
+1. Activate the project's virtual environment.
+2. Run `pip install -r requirements-voice-offline.txt`.
+3. Download a Vosk model for your language from the official Vosk model page and extract it to a folder you control.
+4. Set `JARVIS_VOSK_MODEL_PATH` in your local `.env` to that extracted folder path, for example `C:\\Users\\YOUR_NAME\\vosk-model-small-en-us-0.15`.
+5. Restart JARVIS and click **Voice input (offline)**.
+
+This offline mode does not upload microphone audio for recognition. Wake-word mode remains online in this version. Make sure Windows microphone permissions allow desktop apps to access the microphone.
+
+## Security log, personalization and plugins
+
+- Security Center stores a minimal local audit trail at `%USERPROFILE%\\.jarvis-ai\\security.log.jsonl`; it omits full prompts and secret values.
+- Preferences are stored at `%USERPROFILE%\\.jarvis-ai\\preferences.json`.
+- Built-in plugin toggles are stored at `%USERPROFILE%\\.jarvis-ai\\plugins.json`. The plugin MVP is a reviewed allowlist; it deliberately does not execute arbitrary plugin scripts.
+- AI chat context is held in memory for the current process only and is discarded when JARVIS exits.
+- `research web <topic>` fetches a few DuckDuckGo HTML search results and displays their snippets and URLs. Search content is untrusted; open and verify original sources. `search web <topic>` continues to open a browser search page.
+
 ## Commands
 - `help`, `time`, `system status`
 - `open Google`, `open YouTube`, `open GitHub`
 - `open Notepad`, `open Calculator`, `open Explorer`
 - `open Chrome` or `open <installed app name>` for apps with Start Menu/Desktop shortcuts
-- `search web <words>`
+- `search web <words>` (opens browser search)
+- `research web <topic>` (returns a few snippets and source URLs)
 - `calculate 12 * (4 + 2)`
 - `remind me to stretch in 10 minutes`, `reminders`
 - `search files <words>` (choose a folder with the dashboard button first)
@@ -72,7 +101,7 @@ Or double-click `scripts\update.bat`. The GUI also has **Update JARVIS…**, and
 Use **Terminal Mode…** in the dashboard or type `open terminal`. Select PowerShell or Command Prompt, enter a command, and confirm each run. Commands run visibly in the project folder as your current Windows user (not Administrator), with a 60-second timeout. Common destructive disk, boot, registry, shutdown, and bulk-delete patterns are blocked. This pattern check is only a guardrail, not a complete security boundary; review every command before approving it.
 
 ## Tests
-`python -m unittest discover -s tests -v`
+`python -m compileall -q jarvis tests` then `python -m unittest discover -s tests -v`
 
 ## Safety limitations
 JARVIS does not execute shell commands from ordinary chat or voice intents. Terminal Mode is separate, visible, and requires per-command confirmation; it is not a complete security boundary. JARVIS does not silently capture screenshots. Installed-app launching only opens a matching shortcut discovered in common Start Menu/Desktop locations; apps without shortcuts may not appear. Do not install untrusted plugins. This project has not been verified on every Windows PC.
@@ -85,6 +114,6 @@ JARVIS does not execute shell commands from ordinary chat or voice intents. Term
 - [x] Optional cloud/local AI adapters
 - [x] Visible PowerShell / Command Prompt mode with confirmation and output
 - [x] GitHub fast-forward updater with local-change protection
-- [ ] Offline wake-word engine, more granular app lifecycle/window controls, installer and signed release
+- [ ] Offline wake-word engine, window/app lifecycle controls, configurable themes, full browser research summarization, installer and signed release
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under MIT; see [LICENSE](LICENSE).
