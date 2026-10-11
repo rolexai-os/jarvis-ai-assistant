@@ -52,7 +52,7 @@ def handle_command(command, services=None):
     if low in {"help", "commands"}:
         return ("Commands: help, time, system status, open <website or installed app>, "
                 "search web <words>, calculate <math>, remind me to <task> in 10 minutes, "
-                "reminders, search files <words>, lock PC, clear, exit.")
+                "reminders, search files <words>, lock PC, open terminal, update, clear, exit.")
     if low in {"time", "what time is it", "what time is it?"}:
         return datetime.now().astimezone().strftime("Local time: %A, %d %B %Y, %I:%M:%S %p")
     if low in {"system status", "status"}:
@@ -60,6 +60,12 @@ def handle_command(command, services=None):
     if low in {"lock pc", "lock computer", "lock my pc", "lock workstation"}:
         fn = services.get("lock_pc")
         return fn() if fn else "PC lock is available on Windows only."
+    if low in {"terminal", "open terminal", "powershell", "open powershell", "command prompt", "open command prompt"}:
+        fn = services.get("open_terminal")
+        return fn() or "Terminal Mode opened." if fn else "Terminal Mode is available from the dashboard."
+    if low in {"update", "update jarvis", "check for updates"}:
+        fn = services.get("update")
+        return fn() or "Updater started." if fn else "Use scripts/update.ps1 from the repository folder."
     if low.startswith("open "):
         target = text[5:].strip()
         target_low = target.lower()
