@@ -11,6 +11,11 @@ class ResearchParserTests(unittest.TestCase):
         self.assertEqual(parser.results[0]["url"], "https://example.com/page")
         self.assertEqual(parser.results[0]["snippet"], "A short useful snippet.")
 
+    def test_resolves_duckduckgo_redirect_link(self):
+        parser = _ResultParser()
+        parser.feed('<a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.org%2Farticle">Article</a>')
+        self.assertEqual(parser.results[0]["url"], "https://example.org/article")
+
 
 if __name__ == "__main__":
     unittest.main()
