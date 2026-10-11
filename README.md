@@ -2,56 +2,70 @@
 
 Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces.
 
-## Current features
-- Dark dashboard with system metrics and conversation history.
-- Typed commands, optional one-shot speech recognition and spoken replies.
-- Safe allowlisted website and Windows application launching.
-- System status, arithmetic calculator, local reminders.
-- Read-only file search after you explicitly choose a directory.
-- Screenshot capture only after a confirmation dialog.
-- Optional OpenAI chat adapter, disabled without a local API key.
-- Small opt-in plugin interface and unit tests.
+## Features
+- Animated cyan arc-reactor dashboard, system telemetry and conversation log.
+- Typed commands, optional one-shot voice input and spoken responses.
+- **Opt-in wake-word listening**: enable it in the GUI, then say "JARVIS open Chrome" or "JARVIS what time is it".
+- **Opt-in clap detection**: enable it in the GUI; a loud clap brings JARVIS to the foreground and announces readiness. Claps do not execute PC commands.
+- Discover and launch third-party Windows apps that have Start Menu or Desktop shortcuts. Use "Installed apps list" to inspect discovered shortcuts, then say/type "open <app name>".
+- Built-in shortcuts for Notepad, Calculator, Explorer and approved websites.
+- System status, safe arithmetic, local reminders, web search and read-only file search in a selected folder.
+- Screenshot capture only after a confirmation dialog; Windows lock action.
+- Optional OpenAI cloud chat or local Ollama chat.
+- Unit tests, MIT license and GitHub Actions test workflow.
 
-Status: early-stage MVP. Features that depend on optional libraries, microphone hardware, network access, or API credentials may require additional setup. This is not an unrestricted autonomous agent.
+**Status:** early-stage MVP. Wake-word recognition currently uses the online Google speech-recognition endpoint; it is not offline wake-word detection. This is not an unrestricted autonomous agent.
 
 ## Install on Windows 11
-1. Install Python 3.11 or 3.12 from python.org. Ensure Tkinter is included.
-2. Open PowerShell:
-   git clone https://github.com/rolexai-os/jarvis-ai-assistant.git
-   cd jarvis-ai-assistant
-   py -3.12 -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   Copy-Item .env.example .env
-   python -m jarvis
-3. Edit .env only if you want optional AI chat. Local commands work without an API key.
+Install Python 3.11 or 3.12, then run in PowerShell:
 
-If PowerShell blocks activation, run Set-ExecutionPolicy -Scope Process RemoteSigned in that terminal and activate again.
+```powershell
+git clone https://github.com/rolexai-os/jarvis-ai-assistant.git
+cd jarvis-ai-assistant
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+Copy-Item .env.example .env
+python -m jarvis
+```
+
+If PowerShell blocks activation, run `Set-ExecutionPolicy -Scope Process RemoteSigned` in that terminal, then activate again.
+
+## Voice setup and privacy
+1. Start JARVIS and click **Enable wake word** or **Enable clap detection**. Neither listener starts automatically.
+2. For wake word, say "JARVIS" followed by a command. If you say only "JARVIS", speak a command within about eight seconds.
+3. For clap detection, adjust `JARVIS_CLAP_THRESHOLD` in `.env` if the room is noisy or claps are missed.
+4. Click the matching Disable button to stop monitoring. Closing JARVIS also stops listeners.
+
+Wake-word mode continuously samples microphone audio while enabled and sends audio snippets for online speech recognition. Avoid it if you do not want audio sent to that service. Clap detection processes microphone levels locally. Check Windows microphone privacy settings. Only one listener is enabled at a time by the GUI.
 
 ## Commands
-- help, time, system status
-- open Google / YouTube / GitHub / Wikipedia / Gmail
-- open Notepad / Calculator / Explorer
-- search web words
-- calculate 12 * (4 + 2)
-- remind me to stretch in 10 minutes
-- reminders
-- search files words (choose a folder using the dashboard first)
-- clear, exit
+- `help`, `time`, `system status`
+- `open Google`, `open YouTube`, `open GitHub`
+- `open Notepad`, `open Calculator`, `open Explorer`
+- `open Chrome` or `open <installed app name>` for apps with Start Menu/Desktop shortcuts
+- `search web <words>`
+- `calculate 12 * (4 + 2)`
+- `remind me to stretch in 10 minutes`, `reminders`
+- `search files <words>` (choose a folder with the dashboard button first)
+- `lock PC`, `clear`, `exit`
+
+## Optional AI
+Set `JARVIS_AI_PROVIDER=openai` and provide `OPENAI_API_KEY` for cloud AI. For a local Ollama server, set `JARVIS_AI_PROVIDER=ollama`, set `OLLAMA_MODEL` to an installed model, and start Ollama first. Cloud AI sends prompts to its provider. Keep `.env` private.
 
 ## Tests
-Run: python -m unittest discover -s tests -v
+`python -m unittest discover -s tests -v`
 
-## Privacy and safety
-JARVIS does not execute arbitrary shell commands or silently capture the screen. File search is read-only and scoped to a folder selected by the user. Screenshot capture requires explicit confirmation. Online speech recognition and cloud AI may transmit data to their providers. Never commit .env or share API keys. Review plugins before using them.
+## Safety limitations
+JARVIS does not run arbitrary terminal commands, change security settings, or silently capture screenshots. Installed-app launching only opens a matching shortcut discovered in common Start Menu/Desktop locations; apps without shortcuts may not appear. Do not install untrusted plugins. This project has not been verified on every Windows PC.
 
 ## Roadmap
-- [x] Dashboard, typed commands, allowlisted app/site launching
-- [x] System metrics, reminders, safe calculator
-- [x] Optional voice and AI adapters
-- [x] Folder-scoped search and confirmed screenshot capture
-- [x] Plugin loading interface
-- [ ] Wake-word engine, local model adapter, installer, animated reactor UI
+- [x] Animated arc-reactor dashboard
+- [x] Opt-in wake-word listener and clap detection
+- [x] Start Menu/Desktop shortcut discovery and app launching
+- [x] System metrics, reminders, safe calculator, manual screenshot capture
+- [x] Optional cloud/local AI adapters
+- [ ] Offline wake-word engine, more granular app lifecycle/window controls, installer and signed release
 
-Contributions are welcome. See CONTRIBUTING.md. Licensed under MIT; see LICENSE.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under MIT; see [LICENSE](LICENSE).
