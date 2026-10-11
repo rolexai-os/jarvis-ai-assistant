@@ -177,7 +177,7 @@ class JarvisApp:
             return
         try:
             subprocess.Popen(
-                ["powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)],
+                ["powershell.exe", "-NoExit", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)],
                 cwd=str(script.parent.parent),
                 creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
             )
