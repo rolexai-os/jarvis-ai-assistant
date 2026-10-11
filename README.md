@@ -10,7 +10,7 @@ Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces.
 - Discover and launch third-party Windows apps that have Start Menu or Desktop shortcuts. Use "Installed apps list" to inspect discovered shortcuts, then say/type "open <app name>".
 - Built-in shortcuts for Notepad, Calculator, Explorer and approved websites.
 - System status, safe arithmetic, local reminders, web search and read-only file search in a selected folder.
-- Screenshot capture only after a confirmation dialog; Windows lock action.
+- Screenshot capture only after a confirmation dialog; Windows lock action.\n- Dedicated PowerShell / Command Prompt window with per-command confirmation, visible output and timeout.\n- Embedded terminal blocks common high-risk disk, boot, registry, shutdown and bulk-delete command patterns.\n- PowerShell updater checks GitHub, fast-forward updates a clean `main` checkout and refreshes dependencies while preserving `.env`.
 - Optional OpenAI cloud chat or local Ollama chat.
 - Unit tests, MIT license and GitHub Actions test workflow.
 
@@ -49,7 +49,7 @@ Wake-word mode continuously samples microphone audio while enabled and sends aud
 - `calculate 12 * (4 + 2)`
 - `remind me to stretch in 10 minutes`, `reminders`
 - `search files <words>` (choose a folder with the dashboard button first)
-- `lock PC`, `clear`, `exit`
+- `lock PC`, `open terminal`, `update`, `clear`, `exit`
 
 ## Optional AI
 Set `JARVIS_AI_PROVIDER=openai` and provide `OPENAI_API_KEY` for cloud AI. For a local Ollama server, set `JARVIS_AI_PROVIDER=ollama`, set `OLLAMA_MODEL` to an installed model, and start Ollama first. Cloud AI sends prompts to its provider. Keep `.env` private.
