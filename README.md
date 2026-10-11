@@ -74,7 +74,8 @@ This offline mode does not upload microphone audio for recognition. Wake-word mo
 - `open Google`, `open YouTube`, `open GitHub`
 - `open Notepad`, `open Calculator`, `open Explorer`
 - `open Chrome` or `open <installed app name>` for apps with Start Menu/Desktop shortcuts
-- `search web <words>`
+- `search web <words>` (opens browser search)
+- `research web <topic>` (returns a few snippets and source URLs)
 - `calculate 12 * (4 + 2)`
 - `remind me to stretch in 10 minutes`, `reminders`
 - `search files <words>` (choose a folder with the dashboard button first)
