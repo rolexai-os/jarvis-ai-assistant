@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from html.parser import HTMLParser
-from urllib.parse import quote_plus, urlparse
+from urllib.parse import parse_qs, quote_plus, unquote, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -19,6 +19,12 @@ class _ResultParser(HTMLParser):
         classes = attrs.get("class", "")
         if tag == "a" and "result__a" in classes.split():
             href = attrs.get("href", "")
+            if href.startswith("//"):
+                href = "https:" + href
+            parsed_href = urlparse(href)
+            if parsed_href.netloc.endswith("duckduckgo.com") and parsed_href.path.startswith("/l/"):
+                target = parse_qs(parsed_href.query).get("uddg", [""])[0]
+                href = unquote(target)
             if href.startswith("http://") or href.startswith("https://"):
                 self._current = {"title": "", "url": href, "snippet": ""}
                 self.results.append(self._current)
