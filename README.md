@@ -1,6 +1,6 @@
 # JARVIS AI Assistant
 
-Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces.
+Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces. Current feature-branch version: **0.4.0**.
 
 ## Features
 - Animated cyan arc-reactor dashboard, system telemetry and conversation log.
@@ -36,8 +36,10 @@ py -3.12 -m venv .venv
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 Copy-Item .env.example .env
-python -m jarvis
+python main.py
 ```
+
+`main.py` is the easiest entry point: it loads `.env` and starts the full desktop dashboard, including the existing and newly integrated features. The modular code remains in `jarvis/`. You can also run `python -m jarvis`.
 
 If PowerShell blocks activation, run `Set-ExecutionPolicy -Scope Process RemoteSigned` in that terminal, then activate again.
 
@@ -99,7 +101,7 @@ Or double-click `scripts\update.bat`. The GUI also has **Update JARVIS…**, and
 Use **Terminal Mode…** in the dashboard or type `open terminal`. Select PowerShell or Command Prompt, enter a command, and confirm each run. Commands run visibly in the project folder as your current Windows user (not Administrator), with a 60-second timeout. Common destructive disk, boot, registry, shutdown, and bulk-delete patterns are blocked. This pattern check is only a guardrail, not a complete security boundary; review every command before approving it.
 
 ## Tests
-`python -m unittest discover -s tests -v`
+`python -m compileall -q jarvis tests` then `python -m unittest discover -s tests -v`
 
 ## Safety limitations
 JARVIS does not execute shell commands from ordinary chat or voice intents. Terminal Mode is separate, visible, and requires per-command confirmation; it is not a complete security boundary. JARVIS does not silently capture screenshots. Installed-app launching only opens a matching shortcut discovered in common Start Menu/Desktop locations; apps without shortcuts may not appear. Do not install untrusted plugins. This project has not been verified on every Windows PC.
