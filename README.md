@@ -10,7 +10,10 @@ Free, open-source Windows-first desktop assistant inspired by sci-fi interfaces.
 - Discover and launch third-party Windows apps that have Start Menu or Desktop shortcuts. Use "Installed apps list" to inspect discovered shortcuts, then say/type "open <app name>".
 - Built-in shortcuts for Notepad, Calculator, Explorer and approved websites.
 - System status, safe arithmetic, local reminders, web search and read-only file search in a selected folder.
-- Screenshot capture only after a confirmation dialog; Windows lock action.\n- Dedicated PowerShell / Command Prompt window with per-command confirmation, visible output and timeout.\n- Embedded terminal blocks common high-risk disk, boot, registry, shutdown and bulk-delete command patterns.\n- PowerShell updater checks GitHub, fast-forward updates a clean `main` checkout and refreshes dependencies while preserving `.env`.
+- Screenshot capture only after a confirmation dialog; Windows lock action.
+- Dedicated PowerShell / Command Prompt window with per-command confirmation, visible output and timeout.
+- Embedded terminal blocks common high-risk disk, boot, registry, shutdown and bulk-delete command patterns.
+- PowerShell updater checks GitHub, fast-forward updates a clean `main` checkout and refreshes dependencies while preserving `.env`.
 - Optional OpenAI cloud chat or local Ollama chat.
 - Unit tests, MIT license and GitHub Actions test workflow.
 
@@ -54,11 +57,25 @@ Wake-word mode continuously samples microphone audio while enabled and sends aud
 ## Optional AI
 Set `JARVIS_AI_PROVIDER=openai` and provide `OPENAI_API_KEY` for cloud AI. For a local Ollama server, set `JARVIS_AI_PROVIDER=ollama`, set `OLLAMA_MODEL` to an installed model, and start Ollama first. Cloud AI sends prompts to its provider. Keep `.env` private.
 
+## Update an existing installation
+
+Close JARVIS before a manual update. From the repository folder in PowerShell:
+
+```powershell
+.\scripts\update.ps1
+```
+
+Or double-click `scripts\update.bat`. The GUI also has **Update JARVIS…**, and the command `update` opens the updater. It checks that this is a Git clone on `main`, refuses to proceed if the working tree contains local changes, fetches `origin/main`, uses a fast-forward-only merge (never a hard reset), and refreshes dependencies in `.venv` when available. It does not replace `.env`. Restart JARVIS after updating. If local changes are reported, commit or back them up before trying again.
+
+## Terminal Mode
+
+Use **Terminal Mode…** in the dashboard or type `open terminal`. Select PowerShell or Command Prompt, enter a command, and confirm each run. Commands run visibly in the project folder as your current Windows user (not Administrator), with a 60-second timeout. Common destructive disk, boot, registry, shutdown, and bulk-delete patterns are blocked. This pattern check is only a guardrail, not a complete security boundary; review every command before approving it.
+
 ## Tests
 `python -m unittest discover -s tests -v`
 
 ## Safety limitations
-JARVIS does not run arbitrary terminal commands, change security settings, or silently capture screenshots. Installed-app launching only opens a matching shortcut discovered in common Start Menu/Desktop locations; apps without shortcuts may not appear. Do not install untrusted plugins. This project has not been verified on every Windows PC.
+JARVIS does not execute shell commands from ordinary chat or voice intents. Terminal Mode is separate, visible, and requires per-command confirmation; it is not a complete security boundary. JARVIS does not silently capture screenshots. Installed-app launching only opens a matching shortcut discovered in common Start Menu/Desktop locations; apps without shortcuts may not appear. Do not install untrusted plugins. This project has not been verified on every Windows PC.
 
 ## Roadmap
 - [x] Animated arc-reactor dashboard
@@ -66,6 +83,8 @@ JARVIS does not run arbitrary terminal commands, change security settings, or si
 - [x] Start Menu/Desktop shortcut discovery and app launching
 - [x] System metrics, reminders, safe calculator, manual screenshot capture
 - [x] Optional cloud/local AI adapters
+- [x] Visible PowerShell / Command Prompt mode with confirmation and output
+- [x] GitHub fast-forward updater with local-change protection
 - [ ] Offline wake-word engine, more granular app lifecycle/window controls, installer and signed release
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under MIT; see [LICENSE](LICENSE).
