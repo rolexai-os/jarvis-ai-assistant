@@ -10,6 +10,7 @@ import webbrowser
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, messagebox
+from jarvis.terminal import TerminalWindow
 
 from jarvis.ai import chat as ai_chat
 from jarvis.apps import list_installed_apps, open_installed_app
@@ -79,6 +80,8 @@ class JarvisApp:
         self._button(left, "Search files…", self.choose_search_folder)
         self._button(left, "Screenshot…", self.capture_screenshot)
         self._button(left, "Lock PC", self.confirm_lock)
+        self._button(left, "Terminal Mode…", self.open_terminal)
+        self._button(left, "Update JARVIS…", self.run_updater)
 
         right = tk.Frame(body, bg=PANEL, padx=14, pady=14)
         right.pack(side="left", fill="both", expand=True)
@@ -130,7 +133,7 @@ class JarvisApp:
             "search_files": self.search_files,
             "clear": self.clear_log,
             "exit": self.close,
-            "lock_pc": self.lock_pc,
+            "lock_pc": self.lock_pc,\n            "open_terminal": self.open_terminal,\n            "update": self.run_updater,
             "ai_chat": ai_chat if (os.getenv("OPENAI_API_KEY", "").strip() or os.getenv("JARVIS_AI_PROVIDER", "").lower() == "ollama") else None,
         }
 
@@ -153,6 +156,34 @@ class JarvisApp:
             speak(text[:700], self.speech_rate)
         except Exception:
             pass
+
+    def open_terminal(self):
+        TerminalWindow(
+            self.root,
+            log_callback=lambda message: self.root.after(0, lambda: self.log_line("TERMINAL", message)),
+        )
+
+    def run_updater(self):
+        script = Path(__file__).resolve().parent.parent / "scripts" / "update.ps1"
+        if platform.system() != "Windows" or not script.exists():
+            messagebox.showerror("Updater unavailable", "The PowerShell updater is available in the Windows Git checkout.")
+            return
+        if not messagebox.askyesno(
+            "Update JARVIS",
+            "Check GitHub for updates and refresh dependencies?\n\n"
+            "The updater stops if local Git-tracked changes are detected. "
+            "Close JARVIS and restart it after the update finishes.",
+        ):
+            return
+        try:
+            subprocess.Popen(
+                ["powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)],
+                cwd=str(script.parent.parent),
+                creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
+            )
+            self.log_line("JARVIS", "Updater opened in a separate PowerShell window.")
+        except OSError as exc:
+            messagebox.showerror("Could not start updater", str(exc))
 
     def launch_app(self, name):
         if platform.system() != "Windows":
