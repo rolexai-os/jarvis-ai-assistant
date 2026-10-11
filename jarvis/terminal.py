@@ -62,8 +62,8 @@ class TerminalWindow:
                               insertbackground="#35d9f2", relief="flat",
                               wrap="word", font=("Consolas", 10), padx=10, pady=10)
         self.output.pack(fill="both", expand=True, padx=10, pady=(8, 8))
-        self.output.insert("end", "Commands run in this visible window, in the project folder.\\n"
-                                  "Every command requires confirmation. High-risk destructive commands are blocked.\\n\\n")
+        self.output.insert("end", "Commands run in this visible window, in the project folder.\n"
+                                  "Every command requires confirmation. High-risk destructive commands are blocked.\n\n")
 
         row = tk.Frame(self.window, bg="#050d18", padx=10, pady=8)
         row.pack(fill="x")
@@ -92,7 +92,7 @@ class TerminalWindow:
         if not command:
             return
         if is_blocked_command(command):
-            self.write(f"\\n[BLOCKED] This embedded terminal blocks high-risk destructive commands:\\n{command}\\n")
+            self.write(f"\n[BLOCKED] This embedded terminal blocks high-risk destructive commands:\n{command}\n")
             messagebox.showwarning(
                 "Command blocked",
                 "This command matches a high-risk disk, boot, registry, shutdown, or bulk-delete pattern. "
@@ -103,16 +103,16 @@ class TerminalWindow:
         shell_name = self.shell.get()
         if not messagebox.askyesno(
             "Confirm shell command",
-            f"Run this command in {shell_name}?\\n\\n{command}\\n\\n"
+            f"Run this command in {shell_name}?\n\n{command}\n\n"
             "It runs as your current Windows user, not as Administrator. "
             "Commands can still change files or settings.",
             parent=self.window,
         ):
-            self.write(f"\\n[cancelled] {command}\\n")
+            self.write(f"\n[cancelled] {command}\n")
             return
         self.command.delete(0, "end")
         self.run_button.configure(state="disabled")
-        self.write(f"\\n> {command}\\n")
+        self.write(f"\n> {command}\n")
         threading.Thread(target=self._execute, args=(shell_name, command), daemon=True).start()
 
     def _execute(self, shell_name: str, command: str):
@@ -127,21 +127,21 @@ class TerminalWindow:
             )
             output = (completed.stdout or "") + (completed.stderr or "")
             if output:
-                output += "" if output.endswith("\\n") else "\\n"
-            output += f"[exit code: {completed.returncode}]\\n"
+                output += "" if output.endswith("\n") else "\n"
+            output += f"[exit code: {completed.returncode}]\n"
         except subprocess.TimeoutExpired:
-            output = "[ERROR] Command timed out after 60 seconds.\\n"
+            output = "[ERROR] Command timed out after 60 seconds.\n"
         except FileNotFoundError as exc:
-            output = f"[ERROR] Shell not found: {exc}\\n"
+            output = f"[ERROR] Shell not found: {exc}\n"
         except Exception as exc:
-            output = f"[ERROR] {exc}\\n"
+            output = f"[ERROR] {exc}\n"
         try:
             self.window.after(0, lambda value=output: self._finish(value, command))
         except tk.TclError:
             pass
 
     def _finish(self, output: str, command: str):
-        self.write(output + "\\n")
+        self.write(output + "\n")
         self.run_button.configure(state="normal")
         self.command.focus_set()
         self.log_callback(f"{command} (terminal command completed; see Terminal Mode for output)")
