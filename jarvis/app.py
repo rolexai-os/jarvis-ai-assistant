@@ -301,7 +301,7 @@ class JarvisApp:
             if item.get("snippet"):
                 lines.append("   " + item["snippet"])
             lines.append("   " + item["url"])
-        return "\\n".join(lines)
+        return "\n".join(lines)
 
     def show_apps(self):
         names = list_installed_apps(limit=80)
