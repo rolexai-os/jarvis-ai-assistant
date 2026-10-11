@@ -18,6 +18,7 @@ from jarvis.offline_voice import listen_once_offline
 from jarvis.plugins import PluginRegistry
 from jarvis.preferences import Preferences
 from jarvis.reminders import ReminderStore
+from jarvis.research import research_web
 from jarvis.security import audit_event, read_audit_log
 from jarvis.system_info import get_system_status
 from jarvis.terminal import TerminalWindow
@@ -147,6 +148,8 @@ class JarvisApp:
             "lock_pc": self.lock_pc,
             "open_terminal": self.open_terminal,
             "update": self.run_updater,
+            "plugin_enabled": self.plugins.is_enabled,
+            "research_web": self.research_web,
             "ai_chat": ai_chat if (
                 os.getenv("OPENAI_API_KEY", "").strip()
                 or os.getenv("JARVIS_AI_PROVIDER", "").lower() == "ollama"
@@ -281,6 +284,24 @@ class JarvisApp:
         self.log_line("SENSOR", "Clap detected — JARVIS is here.")
         if self.voice_enabled:
             threading.Thread(target=self.speak_safely, args=("At your service.",), daemon=True).start()
+
+    def research_web(self, query):
+        self.log_line("RESEARCH", "Searching DuckDuckGo for: " + query[:180])
+        try:
+            results = research_web(query, limit=5)
+        except Exception as exc:
+            audit_event("web_research", "error", type(exc).__name__)
+            return f"Web research failed: {exc}"
+        audit_event("web_research", "success", f"Returned {len(results)} source results")
+        if not results:
+            return "No results were parsed. Try 'search web <topic>' to open the browser search page."
+        lines = ["Web research results (verify sources before relying on them):"]
+        for index, item in enumerate(results, 1):
+            lines.append(f"{index}. {item.get('title') or 'Untitled'}")
+            if item.get("snippet"):
+                lines.append("   " + item["snippet"])
+            lines.append("   " + item["url"])
+        return "\\n".join(lines)
 
     def show_apps(self):
         names = list_installed_apps(limit=80)
