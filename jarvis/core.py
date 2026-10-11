@@ -90,6 +90,14 @@ def handle_command(command, services=None):
         if services.get("open_app"):
             return services["open_app"](target)
         return "App launcher unavailable. Try a website, Notepad, Calculator or Explorer."
+    if low.startswith("research web "):
+        if not plugin_enabled("web-search"):
+            return "The Web search skill is disabled in Plugins."
+        query = text[13:].strip()
+        if not query:
+            return "Add a topic after 'research web'."
+        fn = services.get("research_web")
+        return fn(query) if fn else "Web research is unavailable in this build."
     if low.startswith("search web "):
         if not plugin_enabled("web-search"):
             return "The Web search skill is disabled in Plugins."
